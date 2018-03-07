@@ -42,56 +42,14 @@ Vagrant.configure("2") do |config|
   # argument is a set of non-required options.
   config.vm.synced_folder "../", "/synced_folder"
 
-  # config.vm.provision "file", source: "./serve_playbooks.py", destination: "serve_playbooks.py"
-
-  # The following is adapted from
-  # http://stackoverflow.com/a/37335639
   config.vm.provider "virtualbox" do |vb|
-    mem_ratio = 1/2
-    cpu_exec_cap = 75
-    host = RbConfig::CONFIG['host_os']
-    # Give VM 3/4 system memory & access to all cpu cores on the host
-    if host =~ /darwin/
-      cpus = `sysctl -n hw.ncpu`.to_i
-      # sysctl returns Bytes and we need to convert to MB
-      mem = `sysctl -n hw.memsize`.to_i / 1024^2 * mem_ratio
-    elsif host =~ /linux/
-      cpus = `nproc`.to_i
-      # meminfo shows KB and we need to convert to MB
-      mem = `grep 'MemTotal' /proc/meminfo | sed -e 's/MemTotal://' -e 's/ kB//'`.to_i / 1024 * mem_ratio
-    elsif host =~ /mingw/
-      cpus = `wmic cpu get NumberOfCores`.split("\n")[2].to_i
-      mem = `wmic OS get TotalVisibleMemorySize`.split("\n")[2].to_i / 1024 * mem_ratio
-    else
-      cpus = 1
-      mem = 2096128
-    end
-
-    if mem == 0
-      # Just as a backup in case something went wrong above...
-      cpus = 1
-      mem = 2096128   
-    end
-
-    if cpus == 2
-      cpus = 1
-    elsif cpus > 2
-      cpus = cpus - 2
-    end
-    
-    # puts(mem)
-    # puts(mem/1024)
-    # puts(mem/1024^2)
-    # puts "Provisioning VM with #{cpus} CPU cores (at #{cpu_exec_cap}%) and #{mem/1024} MB RAM."
-
-    vb.customize ["modifyvm", :id, "--memory", mem/1024]
-    vb.customize ["modifyvm", :id, "--cpus", cpus]
-
-    vb.customize ["modifyvm", :id, "--cpuexecutioncap", cpu_exec_cap]
-
-    vb.name = "bi2017vm"
-    # You might want to include the following for a GUI
+    # Display the VirtualBox GUI when booting the machine
     # vb.gui = true
+
+    # Customize the amount of memory on the VM:
+    vb.memory = "3072"
+    vb.cpus = "2"
+    vb.name = "python_vm"
   end
 
   #
